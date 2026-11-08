@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sugarcane – AI Irrigation Advisory</title>
+<style>
+:root{--ink:#12323b;--muted:#6b7f84;--bg:#f5f1e8;--card:#fff;--line:#e8e1d2;--teal:#0e9aa7;--deep:#0b3442;--gold:#f2a93b;--coral:#e8604c;--ok:#2f9e6e;--sky:#e3f4f6}
+*{box-sizing:border-box}body{margin:0;display:flex;min-height:100vh;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",sans-serif}
+aside{width:236px;flex:none;background:linear-gradient(170deg,var(--deep),#0e5560);color:#dff3f5;padding:22px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+.brand{font-size:1.45rem;font-weight:800;color:#fff}.brand span{color:var(--gold)}.tag{font-size:.75rem;opacity:.75;margin-bottom:14px}
+aside small{opacity:.6;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;margin-top:10px}
+.role,.live{all:unset;cursor:pointer;padding:10px 12px;border-radius:10px;font-size:.92rem}.role:hover,.live:hover{background:#ffffff14}.role.on{background:var(--gold);color:#2b1c00;font-weight:700}
+.live.on{background:#5ee0a033;color:#9ff0c6}.live.on::before{content:"● ";animation:b 1s infinite}@keyframes b{50%{opacity:.2}}
+.pill{margin-top:auto;padding:10px 12px;border-radius:12px;background:#ffffff14;font-size:.78rem;line-height:1.35}.pill i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--coral);margin-right:6px}.pill.demo i{background:var(--gold)}.pill.on i{background:#5ee0a0;box-shadow:0 0 0 4px #5ee0a033}
+main{flex:1;padding:24px 28px;min-width:0}h1{margin:0;font-size:1.6rem}.sub{color:var(--muted);margin:2px 0 16px}h2{font-size:1.05rem;margin:0 0 10px}
+.grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.plots{grid-template-columns:repeat(auto-fill,minmax(215px,1fr));margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 8px #0b34420a}
+.kpi{cursor:pointer;transition:.15s}.kpi:hover{transform:translateY(-2px)}.kpi small{color:var(--muted)}.kpi b{display:block;font-size:1.7rem;margin-top:2px}.kpi.a b{color:var(--teal)}.kpi.w b{color:var(--coral)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px}.tools select,.tools input{width:auto;min-width:130px}
+.f{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;cursor:pointer;font:inherit;font-size:.85rem;color:var(--ink)}.f.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.plot{cursor:pointer;transition:.15s;border-top:5px solid var(--ok);animation:in .3s}@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.plot:hover{transform:translateY(-3px);box-shadow:0 8px 20px #0b344222}.plot.sel{outline:2px solid var(--teal)}.plot.now{border-top-color:var(--coral)}.plot.soon{border-top-color:var(--gold)}.plot.rain{border-top-color:var(--teal)}
+.plot .m{font-size:1.9rem;font-weight:800;margin:6px 0}.plot small{color:var(--muted)}.bar{height:7px;border-radius:9px;background:var(--sky);overflow:hidden;margin:6px 0}.bar div{height:100%;background:linear-gradient(90deg,var(--teal),#5cc8d1);transition:width .6s}
+.chip{display:inline-block;font-size:.72rem;padding:3px 9px;border-radius:99px;background:#eee;margin-top:6px}.chip.now{background:#fde3df;color:#b23a29}.chip.soon{background:#fdf0d6;color:#8a5a00}.chip.ok{background:#dff3e8;color:#1d6c49}.chip.rain{background:var(--sky);color:#0a6a74}
+.two{grid-template-columns:2fr 1fr}.three{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:14px}
+@media(max-width:860px){body{flex-direction:column}aside{width:100%;height:auto;position:static;flex-direction:row;flex-wrap:wrap}.pill{margin:0}.two{grid-template-columns:1fr}}
+svg{width:100%;display:block}svg text{fill:var(--muted);font-size:11px}.adv{border-left:6px solid var(--teal)}.adv.now{border-color:var(--coral)}.adv .big{font-size:1.2rem;font-weight:700;margin:8px 0}
+select,input{width:100%;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit}label{font-size:.78rem;color:var(--muted);display:block;margin:8px 0 3px}
+input[type=range]{padding:0;accent-color:var(--teal)}
+button.p,button.g,button.r{border:0;border-radius:10px;padding:9px 14px;cursor:pointer;font:inherit;font-weight:700}button.p{background:var(--teal);color:#fff}button.g{background:var(--ok);color:#fff}button.r{background:#fde3df;color:#b23a29}
+.item{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+pre{margin:0;background:#0b3442;color:#cdeff2;border-radius:12px;padding:12px;font-size:.76rem;overflow:auto}.hint{color:var(--muted);font-size:.8rem}
+#toast{position:fixed;right:18px;bottom:18px;background:var(--deep);color:#fff;padding:12px 16px;border-radius:12px;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;max-width:320px}#toast.show{opacity:1;transform:none}
+</style></head><body>
+<aside><div class="brand">Sugar<span>cane</span></div><div class="tag">AI irrigation advisory · KJS-AGR-01</div>
+<small>View as</small><button class="role on" data-role="farmer">🌾 Farmer</button><button class="role" data-role="agro">🔬 Agronomist</button><button class="role" data-role="manager">🏭 Factory manager</button>
+<small>Live demo</small><button class="live" id="live">Simulate sensor stream</button>
+<div class="pill" id="db"><i></i><span>Connecting to MySQL…</span></div></aside>
+<main>
+<h1>Sugarcane irrigation advisory</h1><p class="sub">Plot-level advice from soil sensors, rain forecast and crop stage · KIAAR × Godavari Biorefineries</p>
+<div class="card" id="banner" hidden style="border-left:6px solid var(--coral);margin-bottom:14px"></div>
+<div class="grid kpis" id="kpis" data-r="agro,manager"></div>
+<div class="tools"><button class="f on" data-f="all">All</button><button class="f" data-f="need">Needs water</button><button class="f" data-f="ok">Adequate</button><button class="f" data-f="off">Sensor offline</button>
+ <select id="soil"><option value="">All soils</option><option>Black</option><option>Red</option><option>Loam</option></select>
+ <select id="sort"><option value="dry">Driest first</option><option value="code">Plot code</option><option value="area">Largest area</option></select>
+ <input id="q" placeholder="Search farmer or village…"></div>
+<div class="grid plots" id="plots"></div>
+<div class="grid two">
+ <div class="card"><h2 id="ct">Soil moisture</h2><div style="display:flex;gap:6px;margin-bottom:6px"><button class="f" data-d="3">3 d</button><button class="f on" data-d="7">7 d</button><button class="f" data-d="14">14 d</button></div>
+  <svg id="chart" viewBox="0 0 620 250"></svg><div class="hint">Hover the chart · solid: sensor · dashed: 7-day forecast · red: threshold</div></div>
+ <div class="card adv" id="advc"><h2>Advisory</h2><select id="lang"><option value="en">English</option><option value="hi">हिन्दी</option><option value="kn">ಕನ್ನಡ</option><option value="mr">मराठी</option></select>
+  <div class="big" id="adv">…</div><span class="chip" id="official"></span>
+  <hr style="border:0;border-top:1px solid var(--line);margin:14px 0"><label>I irrigated for (hours)</label><div style="display:flex;gap:8px"><input id="ih" type="number" step="0.5" value="2"><button class="g" onclick="irrigated()">Log</button></div></div></div>
+<div class="grid three"><div class="card"><small class="hint">Fertigation</small><h2 id="fert">–</h2></div><div class="card"><small class="hint">Pump window (electricity)</small><h2 id="pump">–</h2></div>
+ <div class="card"><small class="hint">Yield risk from delay</small><h2 id="loss">–</h2></div><div class="card"><small class="hint">Next irrigation (forecast)</small><h2 id="nxt">–</h2></div></div>
+<div class="grid two" style="margin-top:14px">
+ <div class="card"><h2>What-if explorer</h2><p class="hint">Drag the sliders and see how the advice changes (computed by the server).</p>
+  <label>Soil moisture: <b id="wmv">25</b>%</label><input id="wm" type="range" min="8" max="45" step="0.5" value="25">
+  <label>Rain forecast: <b id="wrv">0</b> mm</label><input id="wr" type="range" min="0" max="30" value="0">
+  <label>Crop stage</label><select id="ws"><option>Germination</option><option>Tillering</option><option selected>Grand growth</option><option>Maturity</option></select>
+  <div class="card" style="margin-top:12px;background:var(--sky);box-shadow:none"><b id="wout">–</b></div></div>
+ <div class="card"><h2>Irrigation log</h2><div id="log"></div></div></div>
+<div class="grid two" style="margin-top:14px" data-r="agro">
+ <div class="card"><h2>Expert approval console</h2><p class="hint">Drafts stay “pending” until an agronomist approves them – human in the loop.</p><button class="p" onclick="gen()">Generate today’s advisories</button><div id="alerts"></div></div>
+ <div class="card"><h2>Simulate IoT sensor</h2><label>Plot</label><select id="ip"></select><label>Soil moisture 30 cm (%)</label><input id="im" type="number" value="20" step="0.1">
+  <label>Rain forecast (mm)</label><input id="ir" type="number" value="0"><button class="p" style="margin-top:12px;width:100%" onclick="ingest()">POST /api/ingest</button></div></div>
+<div class="grid two" style="margin-top:14px" data-r="agro,manager">
+ <div class="card"><h2>How the backend connects</h2><pre>Browser (fetch) → Flask API (app.py) → mysql.connector → MySQL
+
+SELECT p.*, r.moisture_30, r.rain_fc_mm
+FROM plots p LEFT JOIN readings r ON r.id =
+  (SELECT MAX(id) FROM readings
+   WHERE plot_id = p.id);</pre></div>
+ <div class="card"><h2>Live connection</h2><pre id="status">…</pre></div></div>
+</main><div id="toast"></div>
+<script>
+const $=id=>document.getElementById(id),A={now:"Irrigate now",soon:"Irrigate soon",ok:"Adequate",rain:"Rain expected"};
+let role="farmer",sel=null,plots=[],flt="all",days=7,tmr=null;
+let demo=false;const realApi=(u,o)=>fetch(u,o).then(async r=>{const j=await r.json();if(!r.ok)throw new Error(j.detail||j.error||r.status);return j});
+const api=(u,o)=>demo?mock(u,o):realApi(u,o);
+const post=(u,b)=>api(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b||{})});
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(e.t);e.t=setTimeout(()=>e.classList.remove("show"),2600)}
+function applyRole(){document.querySelectorAll("[data-r]").forEach(e=>e.hidden=!e.dataset.r.split(",").includes(role));document.querySelectorAll(".role").forEach(b=>b.classList.toggle("on",b.dataset.role==role))}
+document.querySelectorAll(".role").forEach(b=>b.onclick=()=>{role=b.dataset.role;applyRole()});
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>setF(b.dataset.f));
+function setF(f){flt=f;document.querySelectorAll("[data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f==f));draw()}
+document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{days=+b.dataset.d;document.querySelectorAll("[data-d]").forEach(x=>x.classList.toggle("on",x==b));detail()});
+["soil","sort","q"].forEach(i=>$(i).oninput=draw);
+async function health(){if(demo){$("db").className="pill demo";$("db").lastElementChild.innerHTML="Demo mode · no database<br><small>sample data in your browser</small>";$("status").textContent="Database: not connected\nShowing built-in demo data.";return}try{const h=await api("/api/health");$("db").className="pill on";$("db").lastElementChild.innerHTML=`MySQL connected<br><small>${h.db_name} @ ${h.host}:${h.port}</small>`;
+ $("status").textContent=`ok: ${h.ok}\nuser: ${h.user}\ndatabase: ${h.db_name}\nMySQL ${h.version}\nplots: ${h.plots} · readings: ${h.readings}\nadvisories: ${h.advisories} · irrigation logs: ${h.irrigations}`}
+ catch(e){$("db").lastElementChild.textContent="Database unreachable";$("status").textContent=e.message}}
+async function load(){const [s,p]=await Promise.all([api("/api/summary"),api("/api/plots")]);plots=p;
+ $("kpis").innerHTML=[["Plots monitored",s.plots,"","all"],["Area (acres)",s.acres,"",""],["Avg soil moisture",s.avg_moisture+"%","a",""],["Need irrigation (click)",s.need_water+" / "+s.plots,"w","need"],["Water scheduled",s.water_hours+" hrs","a",""],["Sensors offline (click)",s.offline,s.offline?"w":"","off"]]
+  .map(k=>`<div class="card kpi ${k[2]}" onclick="${k[3]?`setF('${k[3]}')`:""}"><small>${k[0]}</small><b>${k[1]}</b></div>`).join("");
+ if(!$("ip").options.length)$("ip").innerHTML=p.map(x=>`<option value="${x.id}">${x.code} – ${x.farmer}</option>`).join("");
+ if(!sel)sel=p[0].id;draw();detail();alerts();logs()}
+function draw(){const q=$("q").value.toLowerCase(),so=$("soil").value,so2=$("sort").value;
+ let l=plots.filter(p=>(flt=="all"||(flt=="need"&&p.hours>0)||(flt=="ok"&&p.hours==0)||(flt=="off"&&p.sensor!="online"))&&(!so||p.soil==so)&&(p.farmer+p.village).toLowerCase().includes(q));
+ l.sort((a,b)=>so2=="dry"?(a.moisture_30-a.threshold)-(b.moisture_30-b.threshold):so2=="area"?b.area_acres-a.area_acres:a.code.localeCompare(b.code));
+ $("plots").innerHTML=l.map(x=>`<div class="card plot ${x.action} ${x.id==sel?"sel":""}" onclick="pick(${x.id})"><b>${x.code}</b> · ${x.farmer}<br><small>${x.village} · ${x.soil} soil · ${x.area_acres} ac · ${x.crop_stage}</small>
+ <div class="m">${x.moisture_30??"–"}%</div><div class="bar"><div style="width:${Math.min(100,(x.moisture_30||0)*2.2)}%"></div></div>
+ <span class="chip ${x.action}">${A[x.action]}${x.hours?" · "+x.hours+" h":""}</span> <span class="chip">${x.sensor==="online"?"● sensor ok":"○ sensor "+x.sensor}</span></div>`).join("")||'<div class="card hint">No plots match these filters.</div>'}
+function pick(id){sel=id;draw();detail();const p=plots.find(x=>x.id==id);$("wm").value=p.moisture_30;$("ws").value=p.crop_stage;whatif()}
+async function detail(){const [o,h,a]=await Promise.all([api(`/api/plots/${sel}/outlook`),api(`/api/plots/${sel}/series?days=${days}`),api(`/api/plots/${sel}/advisory?lang=${$("lang").value}`)]);
+ const p=o.plot,t=p.threshold;$("ct").textContent=`${p.code} · ${p.farmer} – soil moisture (${p.crop_stage})`;
+ const pts=[...h.map(r=>({v:r.moisture_30,l:new Date(r.recorded_at).toLocaleString([], {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}),f:0})),...o.forecast.map(d=>({v:d.pred,l:d.date,f:1}))],n=pts.length,hn=h.length;
+ const x=i=>36+i*(570/(n-1)),y=v=>215-(v-5)*(200/45);let s="";
+ [10,20,30,40].forEach(v=>s+=`<line x1="36" x2="606" y1="${y(v)}" y2="${y(v)}" stroke="#e8e1d2"/><text x="4" y="${y(v)+4}">${v}%</text>`);
+ s+=`<line x1="36" x2="606" y1="${y(t)}" y2="${y(t)}" stroke="#e8604c" stroke-dasharray="5 4"/><text x="520" y="${y(t)-5}">threshold ${t}%</text>`;
+ s+=`<polyline fill="none" stroke="#0e9aa7" stroke-width="3" points="${pts.slice(0,hn).map((q,i)=>x(i)+","+y(q.v)).join(" ")}"/>`;
+ s+=`<polyline fill="none" stroke="#f2a93b" stroke-width="3" stroke-dasharray="6 5" points="${pts.slice(hn-1).map((q,i)=>x(hn-1+i)+","+y(q.v)).join(" ")}"/>`;
+ s+=`<g id="cx" style="display:none"><line id="cl" y1="10" y2="215" stroke="#12323b" stroke-opacity=".3"/><circle id="cc" r="5" fill="#12323b"/><rect id="cr" width="150" height="22" rx="6" fill="#12323b"/><text id="ct2" fill="#fff" style="fill:#fff" font-size="11"></text></g><rect id="ov" x="36" y="0" width="570" height="230" fill="transparent"/>`;
+ $("chart").innerHTML=s;const ov=$("chart").querySelector("#ov");
+ ov.onmousemove=e=>{const b=$("chart").getBoundingClientRect(),mx=(e.clientX-b.left)*620/b.width,i=Math.max(0,Math.min(n-1,Math.round((mx-36)/(570/(n-1))))),q=pts[i],cx=x(i),cy=y(q.v),tx=Math.min(cx+8,456);
+  $("cx").style.display="";$("cl").setAttribute("x1",cx);$("cl").setAttribute("x2",cx);$("cc").setAttribute("cx",cx);$("cc").setAttribute("cy",cy);
+  $("cr").setAttribute("x",tx);$("cr").setAttribute("y",Math.max(cy-30,4));$("ct2").setAttribute("x",tx+8);$("ct2").setAttribute("y",Math.max(cy-30,4)+15);$("ct2").textContent=`${q.l}: ${q.v}%${q.f?" (forecast)":""}`};
+ ov.onmouseleave=()=>$("cx").style.display="none";
+ $("adv").textContent=a.text;$("advc").className="card adv "+a.action;$("official").className="chip "+(a.official?"ok":"");$("official").textContent=a.official?"✔ Approved by agronomist":"Draft – awaiting expert review";
+ $("fert").textContent=a.fertigation;$("pump").textContent=a.pump_window;$("loss").textContent=a.yield_loss_pct+"% if delayed";
+ $("nxt").textContent=a.next_irrigation?`in ${a.next_irrigation.lead} day(s)`:"Not within 7 days";$("ih").value=a.hours||2}
+$("lang").onchange=()=>{detail();alerts();whatif()};
+let wt;async function whatif(){$("wmv").textContent=$("wm").value;$("wrv").textContent=$("wr").value;clearTimeout(wt);wt=setTimeout(async()=>{
+ const w=await api(`/api/whatif?moisture=${$("wm").value}&rain=${$("wr").value}&stage=${$("ws").value}&lang=${$("lang").value}`);$("wout").textContent=`${w.text} (threshold ${w.threshold}%)`},120)}
+["wm","wr","ws"].forEach(i=>$(i).oninput=whatif);
+async function alerts(){const r=await api("/api/advisories?lang="+$("lang").value);
+ $("alerts").innerHTML=r.length?r.map(a=>`<div class="item"><div><b>${a.code}</b> · ${a.farmer}<br><small class="hint">${a.text}</small></div>${a.status=="pending"?`<div><button class="g" onclick="decide(${a.id},'approved')">Approve</button> <button class="r" onclick="decide(${a.id},'rejected')">Reject</button></div>`:`<span class="chip ${a.status=="approved"?"ok":"now"}">${a.status}</span>`}</div>`).join(""):'<p class="hint">No advisories yet today.</p>'}
+async function gen(){const r=await post("/api/advisories/generate");toast(r.created+" new draft advisories");alerts()}
+async function decide(id,d){try{await post(`/api/advisories/${id}/decision`,{decision:d});toast("Advisory "+d)}catch(e){toast(e.message)}alerts();detail()}
+async function logs(){const r=await api("/api/irrigation-log");$("log").innerHTML=r.length?r.map(l=>`<div class="item"><span><b>${l.code}</b> · ${l.farmer}</span><span class="hint">${l.hours} h · ${new Date(l.logged_at).toLocaleString()}</span></div>`).join(""):'<p class="hint">Nothing logged yet.</p>'}
+async function irrigated(){try{await post(`/api/plots/${sel}/irrigated`,{hours:$("ih").value});toast("Irrigation saved to MySQL");logs();health()}catch(e){toast(e.message)}}
+async function ingest(){try{await post("/api/ingest",{plot_id:$("ip").value,moisture_30:$("im").value,rain_fc_mm:$("ir").value});toast("Reading saved to MySQL");sel=+$("ip").value;health();load()}catch(e){toast(e.message)}}
+$("live").onclick=()=>{if(tmr){clearInterval(tmr);tmr=null;$("live").classList.remove("on");$("live").textContent="Simulate sensor stream";return}
+ $("live").classList.add("on");$("live").textContent="Streaming… (click to stop)";tmr=setInterval(async()=>{const p=plots[Math.floor(Math.random()*plots.length)],
+ m=Math.max(8,Math.min(45,p.moisture_30+(Math.random()<.15?12:-Math.random()*3)));try{await post("/api/ingest",{plot_id:p.id,moisture_30:m.toFixed(1),rain_fc_mm:Math.random()<.2?12:0});toast(`${p.code}: new reading ${m.toFixed(1)}%`);load();health()}catch(e){toast(e.message)}},3500)};
+(async()=>{applyRole();try{await realApi("/api/health")}catch(e){demo=true;$("banner").hidden=false;
+ $("banner").innerHTML=`<b>⚠ Can’t reach MySQL</b> – <span class="hint">${e.message}</span><br>Showing demo data so you can still explore. To connect: start MySQL → check the password in <code>config.py</code> → run <code>python setup_db.py</code> → restart <code>python app.py</code> → refresh this page.`}
+ await health();load().then(whatif).catch(e=>$("plots").innerHTML=`<div class="card">${e.message}</div>`)})();
+
+/* ---------- demo backend (used only when MySQL is unreachable) ---------- */
+const TH={"Germination":28,"Tillering":25,"Grand growth":30,"Maturity":20},FERT={"Germination":"DAP 15 kg/acre","Tillering":"Urea 20 kg/acre","Grand growth":"Urea 20 kg + MOP 15 kg/acre","Maturity":"No fertigation (ripening)"};
+const TX={now:{en:"Irrigate tomorrow morning for {h} hours",hi:"कल सुबह {h} घंटे सिंचाई करें",kn:"ನಾಳೆ ಬೆಳಿಗ್ಗೆ {h} ಗಂಟೆ ನೀರು ಹಾಯಿಸಿ",mr:"उद्या सकाळी {h} तास सिंचन करा"},soon:{en:"Irrigate in 2 days for {h} hours",hi:"2 दिन में {h} घंटे सिंचाई करें",kn:"2 ದಿನಗಳಲ್ಲಿ {h} ಗಂಟೆ ನೀರು ಹಾಯಿಸಿ",mr:"2 दिवसांत {h} तास सिंचन करा"},ok:{en:"Soil moisture is adequate; no irrigation needed",hi:"मिट्टी में पर्याप्त नमी है; सिंचाई की जरूरत नहीं",kn:"ಮಣ್ಣಿನಲ್ಲಿ ಸಾಕಷ್ಟು ತೇವಾಂಶವಿದೆ; ನೀರು ಬೇಕಿಲ್ಲ",mr:"जमिनीत पुरेसा ओलावा आहे; सिंचनाची गरज नाही"},rain:{en:"Rainfall is expected; irrigation is not required today",hi:"बारिश की संभावना है; आज सिंचाई की जरूरत नहीं",kn:"ಮಳೆ ನಿರೀಕ್ಷೆಯಿದೆ; ಇಂದು ನೀರು ಬೇಕಿಲ್ಲ",mr:"पावसाची शक्यता आहे; आज सिंचनाची गरज नाही"}};
+const dec=(m,r,s)=>{const l=TH[s]||25;if(r>=10)return["rain",0];if(m>=l+10)return["ok",0];if(m>=l)return["soon",+((l+10-m)*1.25/10).toFixed(1)];return["now",+((l+10-m)*1.25/5).toFixed(1)]};
+const say=(a,h,l)=>(TX[a][l]||TX[a].en).replace("{h}",h);
+let sd=42;const rn=()=>(sd=(sd*16807)%2147483647)/2147483647;
+const DP=[[1,"P-101","Ramesh Patil","Yalakeri","Black",5.6,"Grand growth",19.1,0],[2,"P-102","Sunita Naik","Hukkeri","Red",3.2,"Tillering",27.1,0],[3,"P-103","Mahesh Kamble","Sankeshwar","Black",4.8,"Grand growth",44.5,0],[4,"P-104","Lakshmi Hiremath","Sameerwadi","Loam",2.5,"Germination",24.9,0],[5,"P-105","Basavaraj Kore","Gokak","Red",6.1,"Maturity",33.2,12],[6,"P-106","Anita Jadhav","Mudalagi","Black",3.9,"Tillering",31.0,0],[7,"P-107","Shivanand Desai","Konnur","Loam",7.4,"Grand growth",8.8,0],[8,"P-108","Geeta Mane","Ghataprabha","Red",4.1,"Tillering",30.1,0]]
+ .map(p=>({id:p[0],code:p[1],farmer:p[2],village:p[3],soil:p[4],area_acres:p[5],crop_stage:p[6],moisture_30:p[7],rain_fc_mm:p[8],soil_temp:28,humidity:60,battery_pct:80,signal_pct:85,minutes_ago:p[0]==8?1800:120}));
+const DS={};DP.forEach(p=>{let m=p.moisture_30,a=[];for(let i=0;i<56;i++){a.unshift({recorded_at:new Date(Date.now()-i*6*36e5).toISOString(),moisture_30:+m.toFixed(1)});m=Math.max(10,Math.min(45,m+0.15+rn()*0.35-(rn()<.05?9:0)))}DS[p.id]=a});
+const DA=[],DL=[];
+const enr=p=>{const[a,h]=dec(p.moisture_30,p.rain_fc_mm,p.crop_stage);return{...p,action:a,hours:h,threshold:TH[p.crop_stage],sensor:p.minutes_ago<=600?"online":"offline"}};
+async function mock(u,o){const U=new URL(u,location.origin),P=U.pathname,Q=U.searchParams,B=o&&o.body?JSON.parse(o.body):{},L=Q.get("lang")||"en",M=(P.match(/\/plots\/(\d+)/)||[])[1],post=o&&o.method=="POST";
+ const ps=DP.map(enr),pl=M&&ps.find(x=>x.id==+M);
+ if(P=="/api/plots")return ps;
+ if(P=="/api/summary")return{plots:ps.length,acres:+ps.reduce((s,p)=>s+p.area_acres,0).toFixed(1),avg_moisture:+(ps.reduce((s,p)=>s+p.moisture_30,0)/ps.length).toFixed(1),need_water:ps.filter(p=>p.hours>0).length,water_hours:+ps.reduce((s,p)=>s+p.hours,0).toFixed(1),offline:ps.filter(p=>p.sensor!="online").length,pending:DA.filter(a=>a.status=="pending").length};
+ if(P.endsWith("/outlook")){const fc=[];let nx=null;for(let k=1;k<=7;k++){const v=+Math.max(8,pl.moisture_30-1.1*k).toFixed(1);fc.push({lead:k,date:new Date(Date.now()+k*864e5).toISOString().slice(0,10),pred:v});if(!nx&&v<pl.threshold)nx={lead:k,date:fc[k-1].date}}
+  const sd2=DS[pl.id].filter((_,i)=>i%4==3).filter(r=>r.moisture_30<pl.threshold).length;return{plot:pl,forecast:fc,next_irrigation:nx,rate_per_day:1.1,stress_days:sd2,yield_loss_pct:Math.min(25,sd2*1.5)}}
+ if(P.endsWith("/series"))return DS[pl.id].filter(r=>new Date(r.recorded_at)>Date.now()-(+Q.get("days")||14)*864e5);
+ if(P.endsWith("/advisory")){const off=DA.find(a=>a.plot_id==pl.id&&a.status=="approved"),ac=off?off.action:pl.action,hr=off?off.hours:pl.hours,go=ac=="now"||ac=="soon";
+  const sd2=DS[pl.id].filter((_,i)=>i%4==3).filter(r=>r.moisture_30<pl.threshold).length,nx=pl.moisture_30-1.1*7<pl.threshold?{lead:Math.max(1,Math.ceil((pl.moisture_30-pl.threshold)/1.1))}:null;
+  return{plot:pl.code,official:!!off,action:ac,hours:hr,text:say(ac,hr,L),fertigation:go?FERT[pl.crop_stage]+" after irrigation":"Not needed until the next irrigation",pump_window:go?"5:00 AM - 8:00 AM":"Pump can stay off",yield_loss_pct:Math.min(25,sd2*1.5),next_irrigation:nx}}
+ if(P=="/api/whatif"){const[a,h]=dec(+Q.get("moisture"),+Q.get("rain"),Q.get("stage"));return{action:a,hours:h,threshold:TH[Q.get("stage")],text:say(a,h,L)}}
+ if(P=="/api/advisories/generate"){let n=0;ps.forEach(p=>{if((p.action=="now"||p.action=="soon")&&!DA.find(a=>a.plot_id==p.id)){DA.push({id:DA.length+1,plot_id:p.id,code:p.code,farmer:p.farmer,village:p.village,action:p.action,hours:p.hours,status:"pending"});n++}});return{created:n}}
+ if(P.includes("/decision")){const a=DA.find(x=>x.id==+P.split("/")[3]);if(!a||a.status!="pending")throw new Error("This advisory was already reviewed.");a.status=B.decision;return{ok:true}}
+ if(P=="/api/advisories")return DA.map(a=>({...a,text:say(a.action,a.hours,L)}));
+ if(P=="/api/irrigation-log")return DL.slice(-6).reverse();
+ if(P.endsWith("/irrigated")){const h=+B.hours;if(!(h>0&&h<=12))throw new Error("Enter irrigation hours between 0 and 12.");DL.push({id:DL.length+1,code:pl.code,farmer:pl.farmer,hours:h,logged_at:new Date().toISOString()});return{ok:true}}
+ if(P=="/api/ingest"){const p=DP.find(x=>x.id==+B.plot_id),m=+B.moisture_30;if(!p||!(m>=0&&m<=100))throw new Error("Send plot_id and moisture_30 (0 to 100).");p.moisture_30=m;p.rain_fc_mm=+B.rain_fc_mm||0;p.minutes_ago=0;DS[p.id].push({recorded_at:new Date().toISOString(),moisture_30:m});return{ok:true}}
+ throw new Error("Demo mode: no database")}
+</script></body></html>
